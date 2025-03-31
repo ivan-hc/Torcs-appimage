@@ -149,7 +149,7 @@ BINDS=" --dev-bind /dev /dev \
 	"
 
 EXEC=$(grep -e '^Exec=.*' "${HERE}"/*.desktop | head -n 1 | cut -d "=" -f 2- | sed -e 's|%.||g')
-$HERE/.local/share/junest/bin/junest -n -b "$BINDS" -- $EXEC "$@"
+$HERE/.local/share/junest/bin/junest -n -b "$BINDS" -- /usr/bin/$EXEC "$@"
 EOF
 chmod a+x ./AppRun
 
