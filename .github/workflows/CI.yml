@@ -4,6 +4,8 @@ concurrency:
   cancel-in-progress: true
 
 on:
+  #schedule:
+  #  - cron: "0 21 * * 0"
   workflow_dispatch:
 
 jobs:
@@ -26,7 +28,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v4.4.0
       with:
-        name: Torcs-x86_64.AppImage
+        name: AppImage
         path: 'dist'
         
   release:
@@ -37,8 +39,28 @@ jobs:
       steps:
         - uses: actions/download-artifact@v4.1.8
           with:
-            name: Torcs-x86_64.AppImage
+            name: AppImage
 
+        # Snapshot Release
+        - name: get date
+          run: |
+            SNAPSHOT_TAG="$(date --utc +'%Y%m%d-%H%M%S')"
+            echo SNAPSHOT_TAG="${SNAPSHOT_TAG}" >> "${GITHUB_ENV}"
+          continue-on-error: false
+        - name: create snapshot
+          uses: softprops/action-gh-release@v2
+          with:
+            name: "Snapshot ${{ env.SNAPSHOT_TAG}}"
+            tag_name: "${{ env.SNAPSHOT_TAG}}"
+            prerelease: false
+            draft: false
+            generate_release_notes: false
+            make_latest: false
+            files: |
+              *.AppImage*
+          continue-on-error: false
+
+        # Continuous release
         - name: release
           uses: marvinpinto/action-automatic-releases@latest
           with:
@@ -49,4 +71,3 @@ jobs:
             files: |
               *.AppImage*
             repo_token: ${{ secrets.GITHUB_TOKEN }}
-
